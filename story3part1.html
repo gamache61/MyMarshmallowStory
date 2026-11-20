@@ -552,6 +552,27 @@ function shakeScreen(){
   document.body.classList.add('shake');
 }
 
+/* ---------------- Straight to the bush scene as soon as a choice is made ---------------- */
+function runDescentToBush(kind, onOutcomeReady){
+  lockNextAsSkip();
+  const mm = document.getElementById('marshmallow');
+  const shadow = document.getElementById('mmShadow');
+  const VW = 'clamp(110px,13vw,190px)';
+  // pan straight down to the valley right away
+  camDown(900);
+  mm.style.transition = 'none'; shadow.style.transition = 'none';
+  mm.classList.remove('idle','step','sliding','jumping','walking');
+  setMMPose('default');
+  placeGiant({ left:'62%', bottom:VALLEY_BOTTOM, width:VW });
+  void mm.offsetWidth;
+  setTimeout(()=>{
+    mm.classList.add('idle');
+    if(kind !== 'walk'){ shakeScreen(); spawnDustCloud('62%', '7%', 8); }
+    else { spawnDustCloud('62%', '7%', 4); }
+  }, 950);
+  onOutcomeReady(exitSceneAndContinue);
+}
+
 /* ---------------- The stepped climb-down ---------------- */
 function runDescentWalk(onOutcomeReady){
   lockNextAsSkip();
@@ -810,9 +831,7 @@ function pickChoice(btn, p, opt){
   }
 
   if(opt.descend){
-    if(opt.descend === 'walk'){ runDescentWalk(onOutcomeReady); }
-    else if(opt.descend === 'slide'){ runDescentSlide(onOutcomeReady); }
-    else if(opt.descend === 'jump'){ runDescentJump(onOutcomeReady); }
+    runDescentToBush(opt.descend, onOutcomeReady);
   }
 
   if(opt.outcome){
