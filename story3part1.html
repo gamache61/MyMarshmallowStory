@@ -582,7 +582,8 @@ function runDescentWalk(onOutcomeReady){
     if(i >= CLIMB_STEPS.length){
       mm.classList.remove('walking'); mm.classList.add('idle');
       setMMPose('default');
-      exitSceneAndContinue();
+      lockNextAsSkip();
+      onOutcomeReady(exitSceneAndContinue);
       return;
     }
     const spot = CLIMB_STEPS[i];
@@ -688,49 +689,20 @@ function runDescentJump(onOutcomeReady){
 
 /* ---------------- Shared: walk off-scene into the next scene file ---------------- */
 const NEXT_SCENE_URL = 'story3part2.html';
+let exitStarted = false;
 function exitSceneAndContinue(){
+  if(exitStarted) return; exitStarted = true;
   const mm = document.getElementById('marshmallow');
   const shadow = document.getElementById('mmShadow');
-  const exitLine = "Down at the bottom at last, the big boy set off along the mountainside, following the sound of trouble - and before long, he'd walked clean out of sight around the bend.";
-  speakThen(exitLine, true, 'storyText', ()=>{
-    setTimeout(()=>{ window.location.href = NEXT_SCENE_URL; }, 400);
-  });
-  camDown(1800);
   const VW = 'clamp(110px,13vw,190px)';
-  const offScreen = parseFloat(mm.style.left) > 100;
-  const WALK_OUT = 'left 2.2s ease-in, bottom 2.2s ease-in, width 2.2s ease-in';
-  if(!offScreen){
-    // he is still in view: ride the camera down with him so he stays in the picture
-    const curLeft = mm.style.left;
-    const rideT = 'bottom 1.8s ease-in-out, width 1.8s ease-in-out';
-    mm.style.transition = rideT; shadow.style.transition = rideT;
-    mm.classList.remove('idle','step','sliding','jumping'); mm.classList.add('walking');
-    placeGiant({ left:curLeft, bottom:VALLEY_BOTTOM, width:VW });
-    setTimeout(()=>{ mm.classList.remove('walking'); mm.classList.add('idle'); shakeScreen(); spawnDustCloud(curLeft, VALLEY_BOTTOM, 5); }, 1900);
-    setTimeout(()=>{
-      mm.style.transition = WALK_OUT; shadow.style.transition = WALK_OUT;
-      mm.classList.remove('idle'); mm.classList.add('walking');
-      placeGiant({ left:'118%', bottom:VALLEY_BOTTOM, width:VW });
-    }, 3000);
-    return;
-  }
-  setTimeout(()=>{
-    mm.style.transition = 'none'; shadow.style.transition = 'none';
-    placeGiant({ left:'108%', bottom:VALLEY_BOTTOM, width:VW });
-    void mm.offsetWidth;
-    const inT = 'left 1.6s ease-out, bottom 1.6s ease-out';
-    mm.style.transition = inT; shadow.style.transition = inT;
-    mm.classList.remove('idle','step','sliding','jumping'); mm.classList.add('walking');
-    setMMPose('default');
-    placeGiant({ left:'62%', bottom:VALLEY_BOTTOM, width:VW });
-    setTimeout(()=>{ mm.classList.remove('walking'); mm.classList.add('idle'); shakeScreen(); }, 1700);
-    setTimeout(()=>{
-      const outT = 'left 2.2s ease-in, bottom 2.2s ease-in';
-      mm.style.transition = outT; shadow.style.transition = outT;
-      mm.classList.remove('idle'); mm.classList.add('walking');
-      placeGiant({ left:'-20%', bottom:VALLEY_BOTTOM, width:VW });
-    }, 3400);
-  }, 1900);
+  // cut down to the bush scene: Marshmallow has arrived at the bottom
+  camDown(1000);
+  mm.style.transition = 'none'; shadow.style.transition = 'none';
+  mm.classList.remove('step','sliding','jumping','walking'); mm.classList.add('idle');
+  setMMPose('default');
+  placeGiant({ left:'62%', bottom:VALLEY_BOTTOM, width:VW });
+  setTimeout(()=>{ shakeScreen(); spawnDustCloud('62%', '7%', 6); }, 1000);
+  setTimeout(()=>{ window.location.href = NEXT_SCENE_URL; }, 3200);
 }
 
 function fleeCritter(id){
@@ -831,7 +803,9 @@ function pickChoice(btn, p, opt){
   }
 
   if(opt.descend){
-    runDescentToBush(opt.descend, onOutcomeReady);
+    if(opt.descend === 'walk'){ runDescentWalk(onOutcomeReady); }
+    else if(opt.descend === 'slide'){ runDescentSlide(onOutcomeReady); }
+    else if(opt.descend === 'jump'){ runDescentJump(onOutcomeReady); }
   }
 
   if(opt.outcome){
@@ -992,6 +966,7 @@ function lockNextAsSkip(){
 function nextPage(){
   if(skipMode){
     if('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if(!exitStarted){ exitSceneAndContinue(); return; }
     window.location.href = NEXT_SCENE_URL; return;
   }
   if(PAGES[currentPage] && PAGES[currentPage].isChoice){
