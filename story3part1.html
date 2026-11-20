@@ -33,11 +33,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Marshmallow's First Squish</title>
-<link rel="manifest" href="/manifest1.json">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2C3E50">
 <script>
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('/sw1.js'));
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
   }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -640,7 +640,7 @@ function runDescentJump(onOutcomeReady){
 }
 
 /* ---------------- Shared: walk off-scene into the next scene file ---------------- */
-const NEXT_SCENE_URL = 'index1.html';
+const NEXT_SCENE_URL = 'Story3part2.html';
 function exitSceneAndContinue(){
   const mm = document.getElementById('marshmallow');
   const shadow = document.getElementById('mmShadow');
@@ -930,6 +930,6 @@ window.addEventListener('load', ()=>{
 });
 
 </script>
-<a href="part2.html">Continue to the next part</a>
+<a href="Story3part2.html">Continue to the next part</a>
 </body>
 </html>
