@@ -230,7 +230,7 @@
   .ctrlBtn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.18);}
   #readBtn{background:var(--accent1);}
   #nextBtn{background:var(--accent2);}
-  #nextBtn:disabled{opacity:.4;cursor:default;}
+  #nextBtn:disabled{opacity:1;cursor:pointer;}
   #pauseBtn{background:#8899aa;padding:11px 14px;}
 
   #pauseOverlay{display:none;position:absolute;inset:0;z-index:20;background:rgba(20,30,40,.55);
@@ -742,7 +742,7 @@ function showPage(i){
   readBtn.style.display = 'inline-block';
   nextBtn.textContent = 'Next page →';
   if(p.isChoice){
-    nextBtn.disabled = true;
+    /*keep active*/
   }
 
 
@@ -920,7 +920,7 @@ function speakThen(text, withHighlight, targetId, callback){
    finishes - so kids can't skip ahead before hearing the page. */
 function lockNextUntilRead(text, targetId, pageIndex){
   const nextBtn = document.getElementById('nextBtn');
-  if(!skipMode) nextBtn.disabled = true;
+  if(!skipMode) /*keep active*/
   speakThen(text, true, targetId, ()=>{
     if(currentPage !== pageIndex) return;
     nextBtn.disabled = false;
@@ -933,7 +933,7 @@ function readAloud(){
   const gateNext = !p.isChoice;
   const nextBtn = document.getElementById('nextBtn');
   const pageAtCallTime = currentPage;
-  if(gateNext) nextBtn.disabled = true;
+  if(gateNext) /*keep active*/
   speak(text, true, 'storyText', ()=>{
     if(currentPage !== pageAtCallTime) return;
     if(gateNext) nextBtn.disabled = false;
@@ -951,7 +951,9 @@ function nextPage(){
     if('speechSynthesis' in window) window.speechSynthesis.cancel();
     window.location.href = NEXT_SCENE_URL; return;
   }
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
   if(currentPage + 1 < PAGES.length){ showPage(currentPage + 1); }
+  else { window.location.href = NEXT_SCENE_URL; }
 }
 
 function pauseStory(){
