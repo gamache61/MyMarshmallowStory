@@ -440,12 +440,17 @@ function setMMPose(poseName){
   document.body.insertBefore(cam, document.body.firstChild);
 })();
 let camIsDown = false;
-function camDown(ms){
-  if(camIsDown) return; camIsDown = true;
+function camFollow(pan, ms, easing){
   const cam = document.getElementById('cam');
-  cam.style.transition = 'transform ' + (ms||2400) + 'ms ease-in-out';
-  cam.style.transform = 'translateY(-100%)';
+  cam.style.transition = 'transform ' + ms + 'ms ' + (easing || 'ease-in-out');
+  cam.style.transform = 'translateY(-' + pan + '%)';
+  if(pan >= 100) camIsDown = true;
 }
+function camDown(ms){
+  if(camIsDown) return;
+  camFollow(100, ms || 2400);
+}
+const VW_FOLLOW = 'clamp(110px,13vw,190px)';
 const VALLEY_BOTTOM = '-93%';
 const PAGES = [
   { text: "Marshmallow had finally found his new home in the mountain cave. Each morning he liked to sit out on the wide ledge beside it, high above the clouds on the tallest mountain - for Marshmallow was a boy unlike any other. Next to the little creatures of the world, he was a giant. From his mountain ledge, the big boy could see the whole wide world spread out below him: forests, valleys, and all the little creatures who lived there. More than anything, the big boy wanted to help them. But being so enormous, mostly all he could ever do was watch.",
@@ -520,7 +525,7 @@ function spawnFallingRock(leftPct, sizePx){
   r.style.left = leftPct;
   r.style.width = sizePx + 'px';
   r.style.height = Math.round(sizePx * 0.72) + 'px';
-  (document.getElementById('cam')||document.body).appendChild(r);
+  document.body.appendChild(r);
   setTimeout(()=>r.remove(), 1300);
 }
 
@@ -574,11 +579,13 @@ function runDescentToBush(kind, onOutcomeReady){
 }
 
 /* ---------------- The stepped climb-down ---------------- */
+const SB_FOR_DUST = [40.5,28,16,7];
 function runDescentWalk(onOutcomeReady){
   lockNextAsSkip();
   const mm = document.getElementById('marshmallow');
   let i = 1; // step 0 is where he already is (ledge edge)
   function doStep(){
+    if(exitStarted) return;
     if(i >= CLIMB_STEPS.length){
       mm.classList.remove('walking'); mm.classList.add('idle');
       setMMPose('default');
@@ -587,11 +594,13 @@ function runDescentWalk(onOutcomeReady){
       return;
     }
     const spot = CLIMB_STEPS[i];
-    placeGiant(spot);
+    const PANS = [0,35,70,100], SB = [40.5,28,16,7];
+    placeGiant({ left:spot.left, bottom:(SB[i]-PANS[i]) + '%', width:(i===CLIMB_STEPS.length-1 ? VW_FOLLOW : undefined) });
+    camFollow(PANS[i], 650);
     mm.classList.remove('idle'); mm.classList.add('step');
     setMMPose('default');
     shakeScreen();
-    spawnDust(spot.left, spot.bottom);
+    spawnDust(spot.left, (SB_FOR_DUST[i]-[0,35,70,100][i]) + '%');
     if(i === 1){ fleeCritter('squirrel'); }
     if(i === 2){ fleeCritter('rabbit'); }
     setTimeout(()=>{ mm.classList.remove('step'); }, 350);
@@ -608,21 +617,16 @@ function runDescentSlide(onOutcomeReady){
   mm.classList.remove('idle'); mm.classList.add('sliding');
   setMMPose('default');
   spawnDustCloud(GIANT_SPOTS[1].left, GIANT_SPOTS[1].bottom, 8);
-  const slideTransition = 'left 1.9s cubic-bezier(.3,.55,.25,1), bottom 1.9s cubic-bezier(.3,.55,.25,1)';
+  const slideTransition = 'left 1.9s cubic-bezier(.3,.55,.25,1), bottom 1.9s cubic-bezier(.3,.55,.25,1), width 1.9s cubic-bezier(.3,.55,.25,1)';
   mm.style.transition = slideTransition;
   shadow.style.transition = slideTransition;
-  placeGiant(SLIDE_OVERSHOOT_SPOT);
+  camFollow(100, 1900, 'cubic-bezier(.3,.55,.25,1)');
+  placeGiant({ left:'62%', bottom:VALLEY_BOTTOM, width:VW_FOLLOW });
   const waypoints = CLIMB_STEPS.slice(0, CLIMB_STEPS.length - 1);
   waypoints.forEach((spot, idx) => {
     setTimeout(()=> spawnDustCloud(spot.left, spot.bottom, 5), 250 + idx * 300);
   });
   spawnDustCloud(GIANT_APPROACH_SPOT.left, GIANT_APPROACH_SPOT.bottom, 5);
-  setTimeout(()=> spawnDustCloud('70%', '11%', 5), 900);
-  setTimeout(()=> spawnDustCloud('90%', '11%', 6), 1200);
-  setTimeout(()=> spawnDustCloud('98%', '11%', 7), 1450);
-  setTimeout(()=> spawnDustCloud('104%', '11%', 7), 1600);
-  setTimeout(()=> spawnDustCloud('109%', '11%', 8), 1720);
-  setTimeout(()=> spawnDustCloud('113%', '11%', 8), 1830);
   if(waypoints.length > 0){ setTimeout(()=> fleeCritter('squirrel'), 300); }
   if(waypoints.length > 1){ setTimeout(()=> fleeCritter('rabbit'), 650); }
 
@@ -638,10 +642,8 @@ function runDescentSlide(onOutcomeReady){
     // Don't start this next narration beat until the outcome line (spoken
     // when the button was pressed) has actually finished - otherwise it
     // would cut that speech off partway through.
-    onOutcomeReady(()=>{
-      const goneLine = "Whoosh - he slid so fast that he shot clean off the side of the mountain and out of sight entirely!";
-      speakThen(goneLine, true, 'storyText', exitSceneAndContinue);
-    });
+    spawnDustCloud('62%', '7%', 8);
+    onOutcomeReady(exitSceneAndContinue);
   }, 1900);
 }
 
@@ -652,16 +654,14 @@ function runDescentJump(onOutcomeReady){
   mm.classList.remove('idle'); mm.classList.add('jumping');
   setMMPose('default');
   // Launch off-screen over the edge, just like Slide does
-  const jumpTransition = 'left 1.1s cubic-bezier(.2,.6,.25,1), bottom 1.1s cubic-bezier(.2,.6,.25,1)';
+  const jumpTransition = 'left 1.1s cubic-bezier(.2,.6,.25,1), bottom 1.1s cubic-bezier(.2,.6,.25,1), width 1.1s cubic-bezier(.2,.6,.25,1)';
   mm.style.transition = jumpTransition;
   shadow.style.transition = jumpTransition;
   void mm.offsetWidth; // force reflow so transition is committed
-  placeGiant(SLIDE_OVERSHOOT_SPOT);
+  camFollow(100, 1100, 'cubic-bezier(.2,.6,.25,1)');
+  placeGiant({ left:'62%', bottom:VALLEY_BOTTOM, width:VW_FOLLOW });
 
   // Dust puffs along the jump arc so you see the trajectory
-  setTimeout(()=> spawnDustCloud('42%', '24%', 4), 200);
-  setTimeout(()=> spawnDustCloud('62%', '18%', 4), 450);
-  setTimeout(()=> spawnDustCloud('88%', '11%', 6), 750);
 
   setTimeout(()=>{
     mm.style.transition = '';
@@ -670,19 +670,12 @@ function runDescentJump(onOutcomeReady){
     setMMPose('default');
     shakeScreen();
     // THUD dust where he lands off-screen edge
-    spawnDust(SLIDE_OVERSHOOT_SPOT.left, SLIDE_OVERSHOOT_SPOT.bottom);
-    spawnDust('calc(' + SLIDE_OVERSHOOT_SPOT.left + ' - 4%)', SLIDE_OVERSHOOT_SPOT.bottom);
-    spawnDustCloud(SLIDE_OVERSHOOT_SPOT.left, SLIDE_OVERSHOOT_SPOT.bottom, 8);
+    spawnDustCloud('62%', '7%', 8);
     fleeCritter('squirrel'); fleeCritter('rabbit');
     triggerRockslide();
     onOutcomeReady(()=>{
-      const goneLine = "Whoosh - he jumped so far that he shot clean off the side of the mountain and out of sight entirely!";
-      speakThen(goneLine, true, 'storyText', ()=>{
-        const rockLine = "The THUD was so enormous that it shook loose a whole tumble of rocks, which came clattering and bouncing down the mountainside behind him!";
-        renderWords(rockLine, 'storyText');
-        speakIfNotPaused(rockLine, true, 'storyText');
-        setTimeout(exitSceneAndContinue, 1700);
-      });
+      const rockLine = "The THUD was so enormous that it shook loose a whole tumble of rocks, which came clattering and bouncing down the mountainside behind him!";
+      speakThen(rockLine, true, 'storyText', ()=>{ setTimeout(exitSceneAndContinue, 600); });
     });
   }, 1200);
 }
@@ -694,15 +687,18 @@ function exitSceneAndContinue(){
   if(exitStarted) return; exitStarted = true;
   const mm = document.getElementById('marshmallow');
   const shadow = document.getElementById('mmShadow');
-  const VW = 'clamp(110px,13vw,190px)';
-  // cut down to the bush scene: Marshmallow has arrived at the bottom
-  camDown(1000);
-  mm.style.transition = 'none'; shadow.style.transition = 'none';
-  mm.classList.remove('step','sliding','jumping','walking'); mm.classList.add('idle');
-  setMMPose('default');
-  placeGiant({ left:'62%', bottom:VALLEY_BOTTOM, width:VW });
-  setTimeout(()=>{ shakeScreen(); spawnDustCloud('62%', '7%', 6); }, 1000);
-  setTimeout(()=>{ window.location.href = NEXT_SCENE_URL; }, 3200);
+  if(!camIsDown){
+    // cut down to the bush scene (e.g. Next pressed early)
+    camDown(1000);
+    mm.style.transition = 'none'; shadow.style.transition = 'none';
+    mm.classList.remove('step','sliding','jumping','walking'); mm.classList.add('idle');
+    setMMPose('default');
+    placeGiant({ left:'62%', bottom:VALLEY_BOTTOM, width:VW_FOLLOW });
+    setTimeout(()=>{ shakeScreen(); spawnDustCloud('62%', '7%', 6); }, 1000);
+    setTimeout(()=>{ window.location.href = NEXT_SCENE_URL; }, 3200);
+  } else {
+    setTimeout(()=>{ window.location.href = NEXT_SCENE_URL; }, 2200);
+  }
 }
 
 function fleeCritter(id){
