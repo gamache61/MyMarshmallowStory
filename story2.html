@@ -44,6 +44,7 @@ body.dimOn #textBox{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
 <button id="pauseBtn" class="ctrlBtn ctrlIcon">⏸</button>
 <button id="readBtn" class="ctrlBtn">🔊 Read to me</button>
 <button id="dimBtn" class="ctrlBtn ctrlIcon">🌗</button>
+<a id="contBtn" class="ctrlBtn" href="https://gamache61.github.io/MyMarshmallowstory3Game/" style="display:none;background:#7C6FB0;text-decoration:none">Story 3 →</a>
 <button id="next" class="ctrlBtn">Next page →</button>
 </div>
 <div id="readme" style="display:none">Made with Story Placer</div>
@@ -130,10 +131,12 @@ function render(){
   }
   prevBtn.style.visibility = BOOK.showNav ? 'visible' : 'hidden';
   nextBtn.style.visibility = (BOOK.showNav && !sc.isEnd) ? 'visible' : 'hidden';
+  document.getElementById('contBtn').style.display = idx>=BOOK.scenes.length-1 ? 'block':'none';
+  nextBtn.textContent = idx>=BOOK.scenes.length-1 ? 'Read again ↺' : 'Next page →';
   if(autoRead) speakCurrent();
 }
 prevBtn.onclick=()=>{ idx=Math.max(0,idx-1); render(); };
-nextBtn.onclick=()=>{ const sc=BOOK.scenes[idx]; if(sc && sc.isEnd) return; idx=Math.min(BOOK.scenes.length-1, idx+1); render(); };
+nextBtn.onclick=()=>{ if(idx>=BOOK.scenes.length-1){ idx=0; render(); return; } idx++; render(); };
 if(enterBtn) enterBtn.onclick=()=>{ startEl.style.display='none'; stage.style.display='block'; if(autoRead) speakCurrent(); };
 function speakCurrent(){
   if(!('speechSynthesis' in window)) return;
