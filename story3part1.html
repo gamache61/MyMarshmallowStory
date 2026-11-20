@@ -532,7 +532,7 @@ function shakeScreen(){
 
 /* ---------------- The stepped climb-down ---------------- */
 function runDescentWalk(onOutcomeReady){
-  document.getElementById('nextBtn').disabled = true;
+  lockNextAsSkip();
   const mm = document.getElementById('marshmallow');
   let i = 1; // step 0 is where he already is (ledge edge)
   function doStep(){
@@ -558,7 +558,7 @@ function runDescentWalk(onOutcomeReady){
 }
 
 function runDescentSlide(onOutcomeReady){
-  document.getElementById('nextBtn').disabled = true;
+  lockNextAsSkip();
   const mm = document.getElementById('marshmallow');
   const shadow = document.getElementById('mmShadow');
   mm.classList.remove('idle'); mm.classList.add('sliding');
@@ -602,7 +602,7 @@ function runDescentSlide(onOutcomeReady){
 }
 
 function runDescentJump(onOutcomeReady){
-  document.getElementById('nextBtn').disabled = true;
+  lockNextAsSkip();
   const mm = document.getElementById('marshmallow');
   const shadow = document.getElementById('mmShadow');
   mm.classList.remove('idle'); mm.classList.add('jumping');
@@ -648,7 +648,7 @@ const NEXT_SCENE_URL = 'story3part2.html';
 function exitSceneAndContinue(){
   const mm = document.getElementById('marshmallow');
   const shadow = document.getElementById('mmShadow');
-  document.getElementById('nextBtn').disabled = true;
+  lockNextAsSkip();
   const exitLine = "Down at the bottom at last, the big boy set off along the mountainside, following the sound of trouble - and before long, he'd walked clean out of sight around the bend.";
   speakThen(exitLine, true, 'storyText', ()=>{
     setTimeout(()=>{ window.location.href = NEXT_SCENE_URL; }, 400);
@@ -920,7 +920,7 @@ function speakThen(text, withHighlight, targetId, callback){
    finishes - so kids can't skip ahead before hearing the page. */
 function lockNextUntilRead(text, targetId, pageIndex){
   const nextBtn = document.getElementById('nextBtn');
-  nextBtn.disabled = true;
+  if(!skipMode) nextBtn.disabled = true;
   speakThen(text, true, targetId, ()=>{
     if(currentPage !== pageIndex) return;
     nextBtn.disabled = false;
@@ -940,7 +940,17 @@ function readAloud(){
   });
 }
 
+let skipMode = false;
+function lockNextAsSkip(){
+  skipMode = true;
+  const b = document.getElementById('nextBtn');
+  b.disabled = false; b.textContent = 'Skip \u2192';
+}
 function nextPage(){
+  if(skipMode){
+    if('speechSynthesis' in window) window.speechSynthesis.cancel();
+    window.location.href = NEXT_SCENE_URL; return;
+  }
   if(currentPage + 1 < PAGES.length){ showPage(currentPage + 1); }
 }
 
