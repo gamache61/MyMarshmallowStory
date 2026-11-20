@@ -16,6 +16,9 @@ body.dimOn #textBox{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
 .choice{background:#fff;color:#111;border:0;padding:14px 28px;border-radius:999px;font-weight:650;min-width:260px;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.18);font-size:16px;transition:transform .12s}
 .choice:hover{transform:translateY(-1px) scale(1.02)}
 #counter{position:absolute;bottom:22px;left:22px;background:rgba(0,0,0,.55);color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;z-index:6}
+#continue-btn{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);z-index:25;display:none;background:#ffd9a0;color:#4a2f1c;font-family:inherit;font-weight:bold;font-size:1.3rem;padding:16px 34px;border-radius:40px;box-shadow:0 4px 16px rgba(0,0,0,.45);cursor:pointer;text-decoration:none}
+#continue-btn.show{display:block}
+#continue-btn:hover{background:#ffe6bf}
 #bottomControls{position:absolute;left:0;right:0;bottom:max(18px, env(safe-area-inset-bottom));z-index:8;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 12px}
 .ctrlBtn{font-family:inherit;font-weight:700;font-size:13px;color:#fff;border:none;padding:11px 16px;border-radius:16px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.18);white-space:nowrap}
 .ctrlBtn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
@@ -39,12 +42,12 @@ body.dimOn #textBox{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
 <div id="bg"></div>
 <div id="textWrap"><div id="textBox"></div></div>
 <div id="choices"></div>
+<a id="continue-btn" href="https://gamache61.github.io/MyMarshmallowstory3Game/">Continue to the next story &rarr;</a>
 <div id="bottomControls">
 <button id="prev" class="ctrlBtn ctrlIcon">←</button>
 <button id="pauseBtn" class="ctrlBtn ctrlIcon">⏸</button>
 <button id="readBtn" class="ctrlBtn">🔊 Read to me</button>
 <button id="dimBtn" class="ctrlBtn ctrlIcon">🌗</button>
-<a id="contBtn" class="ctrlBtn" href="https://gamache61.github.io/MyMarshmallowstory3Game/" style="display:none;background:#7C6FB0;text-decoration:none">Story 3 →</a>
 <button id="next" class="ctrlBtn">Next page →</button>
 </div>
 <div id="readme" style="display:none">Made with Story Placer</div>
@@ -132,11 +135,12 @@ function render(){
   prevBtn.style.visibility = BOOK.showNav ? 'visible' : 'hidden';
   nextBtn.style.visibility = (BOOK.showNav && !sc.isEnd) ? 'visible' : 'hidden';
   
-  nextBtn.textContent = idx>=BOOK.scenes.length-1 ? 'Next story →' : 'Next page →';
+  document.getElementById('continue-btn').classList.toggle('show', idx>=BOOK.scenes.length-1);
+  nextBtn.textContent = 'Next page →';
   if(autoRead) speakCurrent();
 }
 prevBtn.onclick=()=>{ idx=Math.max(0,idx-1); render(); };
-nextBtn.onclick=()=>{ if(idx>=BOOK.scenes.length-1){ location.href='https://gamache61.github.io/MyMarshmallowstory3Game/'; return; } idx++; render(); };
+nextBtn.onclick=()=>{ if(idx>=BOOK.scenes.length-1) return; idx++; render(); };
 if(enterBtn) enterBtn.onclick=()=>{ startEl.style.display='none'; stage.style.display='block'; if(autoRead) speakCurrent(); };
 function speakCurrent(){
   if(!('speechSynthesis' in window)) return;
