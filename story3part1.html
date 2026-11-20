@@ -153,6 +153,7 @@
     transition:width 1.8s cubic-bezier(.34,1.2,.5,1);}
   #marshmallow img{width:100%;display:block;filter:drop-shadow(0 8px 8px rgba(0,0,0,.25));}
   #marshmallow.giant{width:clamp(200px,26vw,360px);}
+  body:not(.started) #marshmallow, body:not(.started) #mmShadow, body:not(.started) #mmBubble{visibility:hidden;}
 
   #marshmallow.idle{animation:mmIdle 2.6s ease-in-out infinite;}
   @keyframes mmIdle{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-3px) rotate(-1deg);}}
@@ -650,11 +651,28 @@ function exitSceneAndContinue(){
     setTimeout(()=>{ window.location.href = NEXT_SCENE_URL; }, 400);
   });
   const exitTransition = 'left 1.8s ease-in, bottom 1.8s ease-in';
-  mm.style.transition = exitTransition;
-  shadow.style.transition = exitTransition;
-  mm.classList.remove('idle'); mm.classList.add('walking');
-  setMMPose('default');
-  placeGiant({ left:'118%', bottom: GIANT_APPROACH_SPOT.bottom });
+  function walkOut(){
+    mm.style.transition = exitTransition;
+    shadow.style.transition = exitTransition;
+    mm.classList.remove('idle'); mm.classList.add('walking');
+    setMMPose('default');
+    placeGiant({ left:'118%', bottom: GIANT_APPROACH_SPOT.bottom });
+  }
+  // If he went over the side (slide/jump) he is off-screen: follow him down and bring him back in at the bottom
+  if(parseFloat(mm.style.left) > 100){
+    mm.style.transition = 'none'; shadow.style.transition = 'none';
+    placeGiant({ left:'112%', bottom: GIANT_APPROACH_SPOT.bottom });
+    void mm.offsetWidth;
+    const inT = 'left 1.2s ease-out, bottom 1.2s ease-out';
+    mm.style.transition = inT; shadow.style.transition = inT;
+    mm.classList.remove('idle'); mm.classList.add('walking');
+    placeGiant(GIANT_APPROACH_SPOT);
+    spawnDustCloud(GIANT_APPROACH_SPOT.left, GIANT_APPROACH_SPOT.bottom, 6);
+    setTimeout(()=>{ mm.classList.remove('walking'); mm.classList.add('idle'); shakeScreen(); }, 1250);
+    setTimeout(walkOut, 3200);
+  } else {
+    walkOut();
+  }
 }
 
 function fleeCritter(id){
@@ -684,7 +702,15 @@ function showPage(i){
   shadow.className = 'giant';
   mm.style.transition = 'left .8s ease, bottom .8s ease';
   shadow.style.transition = 'left .8s ease, bottom .8s ease';
-  if(i === 0 || i === 1 || i === 2){ placeGiant(GIANT_SPOTS[i]); }
+  if(i === 0 || i === 1 || i === 2){
+    if(!document.body.classList.contains('started')){
+      mm.style.transition = 'none'; shadow.style.transition = 'none';
+      placeGiant(GIANT_SPOTS[i]);
+      void mm.offsetWidth;
+      document.body.classList.add('started');
+      mm.style.transition = 'left .8s ease, bottom .8s ease'; shadow.style.transition = 'left .8s ease, bottom .8s ease';
+    } else { placeGiant(GIANT_SPOTS[i]); }
+  }
 
   if(i === 1){ setMMPose('rightside'); }
   else if(i === 0 || i === 2){ setMMPose('default'); }
@@ -924,12 +950,11 @@ window.addEventListener('load', ()=>{
     if(hasStarted) return;
     hasStarted = true;
     titleCardEl.style.opacity='0';
-    setTimeout(()=>{ titleCardEl.style.display='none'; showPage(0); }, 800);
+    setTimeout(()=>{ titleCardEl.style.display='none'; showPage(0); document.body.classList.add('started'); }, 800);
   }
   titleCardEl.addEventListener('click', startStory);
 });
 
 </script>
-<a href="story3part2.html">Continue to the next part</a>
 </body>
 </html>
