@@ -769,6 +769,13 @@ function showPage(i){
   const shadow = document.getElementById('mmShadow');
   const isGiantPhase = i <= 2;
 
+  // Clear any leftover inline size from the shrink so skipping pages never leaves him the wrong size
+  mm.style.width = ''; mm.style.height = ''; mm.style.transition = 'none'; shadow.style.transition = 'none';
+  awaitingThumbPop = false;
+  document.getElementById('thumbTarget').classList.remove('show');
+  document.getElementById('thumbPrompt').classList.remove('show');
+  setTimeout(()=>{ mm.style.transition=''; shadow.style.transition=''; }, 60);
+
   if(isGiantPhase){
     mm.className = 'giant idle';
     shadow.className = 'giant';
