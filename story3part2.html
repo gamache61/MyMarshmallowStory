@@ -418,8 +418,8 @@ const VALLEY_SPOT = { left:'55%', bottom:'12%' };
 const GIANT_APPROACH_SPOT = { left:'25%', bottom:'2%' };
 const GIANT_NEAR_SPOT = { left:'25%', bottom:'2%' };
 const SLIDE_OVERSHOOT_SPOT = { left:'118%', bottom:'11%' };
-const SMALL_SPOT   = { left:'40%', bottom:'12%' };
-const RESCUE_SPOT  = { left:'36%', bottom:'12%' };
+const SMALL_SPOT   = { left:'40%', bottom:'16%' };
+const RESCUE_SPOT  = { left:'36%', bottom:'16%' };
 
 function positionThumbTarget(spot){
   const t = document.getElementById('thumbTarget');
@@ -1026,12 +1026,13 @@ function beginTransformation(onOutcomeReady){
   mm.style.width = startWidth + 'px';
   mm.style.left = startLeft + 'px';
   void mm.offsetWidth;
-  mm.style.transition = 'width 4s ease-in-out, left 4s ease-in-out';
+  mm.style.transition = 'width 4s ease-in-out, left 4s ease-in-out, bottom 4s ease-in-out';
   mm.classList.add('squishHold');
   requestAnimationFrame(()=>{
     const newW = Math.round(startWidth * 0.5);
     mm.style.width = newW + 'px';
     mm.style.left = Math.round(startLeft + (startWidth - newW)) + 'px';
+    mm.style.bottom = '16%';
   });
 
   // Reveal the thumb only once the squish animation has visually settled
