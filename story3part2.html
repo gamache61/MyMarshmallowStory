@@ -165,7 +165,7 @@
   #marshmallow img{width:100%;display:block;filter:drop-shadow(0 8px 8px rgba(0,0,0,.25));}
   #marshmallow.giant{width:clamp(200px,26vw,360px);}
   body:not(.ready) #marshmallow, body:not(.ready) #mmShadow, body:not(.ready) #mmBubble{visibility:hidden;}
-  #marshmallow.small{width:clamp(84px,12vw,150px);}
+  #marshmallow.small{width:clamp(60px,7.8vw,108px);}
 
   #marshmallow.idle{animation:mmIdle 2.6s ease-in-out infinite;}
   @keyframes mmIdle{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-3px) rotate(-1deg);}}
@@ -877,7 +877,7 @@ function showPage(i){
   const nextBtn = document.getElementById('nextBtn');
   const readBtn = document.getElementById('readBtn');
   if(p.isEnding){
-    nextBtn.textContent = 'Read it again ↻';
+    nextBtn.textContent = 'Continue to the next story →';
     nextBtn.disabled = false;
     readBtn.style.display = 'none';
   } else {
@@ -1029,7 +1029,7 @@ function beginTransformation(onOutcomeReady){
   mm.style.transition = 'width 4s ease-in-out, left 4s ease-in-out, bottom 4s ease-in-out';
   mm.classList.add('squishHold');
   requestAnimationFrame(()=>{
-    const newW = Math.round(startWidth * 0.5);
+    const newW = Math.round(startWidth * 0.3);
     mm.style.width = newW + 'px';
     mm.style.left = Math.round(startLeft + (startWidth - newW)) + 'px';
     mm.style.bottom = '16%';
@@ -1285,7 +1285,7 @@ Object.defineProperty(document.getElementById('nextBtn'), 'disabled', { get(){ r
 
 function nextPage(){
   const p = PAGES[currentPage];
-  if(p.isEnding){ restart(); return; }
+  if(p.isEnding){ window.location.href = 'story4.html'; return; }
   // A choice page still waits for the player to choose - give the choices a nudge instead
   let needsChoice = false;
   if(p.isPickCreature && !chosenCreature) needsChoice = true;
