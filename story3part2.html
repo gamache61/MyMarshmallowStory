@@ -1290,8 +1290,9 @@ function nextPage(){
   let needsChoice = false;
   if(p.isPickCreature && !chosenCreature) needsChoice = true;
   if(p.isChoice && p.choiceOptions){
-    const o = p.choiceOptions.find(x => x.key === storyChoices[p.trackAs]);
-    if(!o || o.loop) needsChoice = true;
+    const v = storyChoices[p.trackAs];
+    const o = p.choiceOptions.find(x => x.key === v);
+    if(v === undefined || (o && o.loop)) needsChoice = true;
   }
   if(needsChoice){
     const c = document.getElementById('choices');
