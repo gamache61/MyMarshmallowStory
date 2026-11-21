@@ -834,14 +834,14 @@ function showPage(i){
     if(chosenCreature === 'bird' && birdRanAway){
       bird.className = '';
       bird.innerHTML = '';
-      const rest = " Word soon spread through the valley, and the boy spent the rest of that day helping the others too, freeing each of them just as gently. And so, the boy set off traveling on his own, ready to help wherever kindness was needed - though something told him this was only the very beginning of many adventures to come.";
+      const rest = " Word soon spread through the valley, and the boy spent the rest of that day helping the others too, freeing each of them just as gently. And so, the boy set off traveling on his own, ready to help wherever kindness was needed - though something told him this was only the very beginning of many adventures to come. Next, the path would split in three, and high in the mountains someone was waiting for help. Next: Marshmallow Continues On. An interactive story.";
       const endingText = openingText + rest;
       renderWords(endingText, 'endingText');
       speakIfNotPaused(endingText, true, 'endingText');
     } else if(chosenCreature === 'bird'){
       bird.className = '';
       bird.innerHTML = '';
-      const rest = " And so, when the boy set off traveling, it was the little bird who decided to come along too. That was only the very beginning of their adventures together.";
+      const rest = " And so, when the boy set off traveling, it was the little bird who decided to come along too. That was only the very beginning of their adventures together. Next, the path would split in three, and high in the mountains someone was waiting for help. Next: Marshmallow Continues On. An interactive story.";
       const endingText = openingText + rest;
       renderWords(endingText, 'endingText');
       speakIfNotPaused(endingText, true, 'endingText');
@@ -850,7 +850,7 @@ function showPage(i){
       bird.innerHTML = '';
       const preBirdText = " Word soon spread through the valley, and the boy spent the rest of that day helping the others too, freeing each of them just as gently.";
       const birdText = " But it was the little bird, grateful and endlessly curious, who couldn't stop asking the boy about the wide world beyond the valley.";
-      const companionLine = " And so, when the boy set off traveling, it was the little bird who decided to come along too. That was only the very beginning of their adventures together.";
+      const companionLine = " And so, when the boy set off traveling, it was the little bird who decided to come along too. That was only the very beginning of their adventures together. Next, the path would split in three, and high in the mountains someone was waiting for help. Next: Marshmallow Continues On. An interactive story.";
       speakThen(openingText + preBirdText, true, 'endingText', ()=>{
         flyInBird();
         speakThen(birdText, true, 'endingText', ()=>{
