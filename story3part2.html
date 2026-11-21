@@ -1120,11 +1120,20 @@ let pendingSpeak = null;
 function loadVoices(){
   const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
   if(!voices.length) return;
-  mmVoice = voices.find(v => v.name === 'Google UK English Female') ||
-            voices.find(v => /google uk english female/i.test(v.name)) ||
-            voices.find(v => /female/i.test(v.name)) ||
-            voices[0];
-  voicesReady = true;
+  const preferred = voices.find(v => v.name === 'Google UK English Female') ||
+            voices.find(v => /google uk english female/i.test(v.name));
+  if(preferred){
+    mmVoice = preferred;
+    voicesReady = true;
+  } else {
+    // Chrome loads the Google voices a moment after the local ones - wait for
+    // them so every page uses the same voice; fall back after 2.5s if they never come.
+    mmVoice = voices.find(v => /female/i.test(v.name)) || voices[0];
+    if(!window.__voiceWait){
+      window.__voiceWait = setTimeout(()=>{ voicesReady = true; loadVoices(); }, 2500);
+    }
+    if(!voicesReady) return;
+  }
   if(pendingSpeak){
     const p = pendingSpeak;
     pendingSpeak = null;
