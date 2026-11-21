@@ -277,7 +277,8 @@
   .ctrlBtn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.18);}
   #readBtn{background:var(--accent1);}
   #nextBtn{background:var(--accent2);}
-  #nextBtn:disabled{opacity:.4;cursor:default;}
+  #nextBtn:disabled{opacity:1;cursor:pointer;}
+  #choices.nudge{animation:screenShake .4s ease;}
   #pauseBtn{background:#8899aa;padding:11px 14px;}
 
   #pauseOverlay{display:none;position:absolute;inset:0;z-index:20;background:rgba(20,30,40,.55);
@@ -1259,9 +1260,25 @@ function readAloud(){
   });
 }
 
+// The Next button is always active (never greyed out)
+Object.defineProperty(document.getElementById('nextBtn'), 'disabled', { get(){ return false; }, set(v){} });
+
 function nextPage(){
   const p = PAGES[currentPage];
   if(p.isEnding){ restart(); return; }
+  // A choice page still waits for the player to choose - give the choices a nudge instead
+  let needsChoice = false;
+  if(p.isPickCreature && !chosenCreature) needsChoice = true;
+  if(p.isChoice && p.choiceOptions){
+    const o = p.choiceOptions.find(x => x.key === storyChoices[p.trackAs]);
+    if(!o || o.loop) needsChoice = true;
+  }
+  if(needsChoice){
+    const c = document.getElementById('choices');
+    c.classList.remove('nudge'); void c.offsetWidth; c.classList.add('nudge');
+    return;
+  }
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
   if(currentPage + 1 < PAGES.length){ showPage(currentPage + 1); }
 }
 
