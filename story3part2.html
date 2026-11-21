@@ -215,12 +215,12 @@
     100%{transform:translateY(0) scale(1,1);}
   }
 
-  #marshmallow.squishHold{animation:mmSquishDown 1s ease-in forwards;}
+  #marshmallow.squishHold{animation:mmSquishDown 4s ease-in-out forwards;}
   @keyframes mmSquishDown{
     0%{transform:scaleX(1) scaleY(1);}
     100%{transform:scaleX(1.15) scaleY(.3) translateY(22%);}
   }
-  #marshmallow.squishPop{animation:mmSquishPop .9s cubic-bezier(.34,1.56,.64,1) forwards;}
+  #marshmallow.squishPop{animation:mmSquishPop 2.4s cubic-bezier(.34,1.2,.64,1) forwards;}
   @keyframes mmSquishPop{
     0%{transform:scaleX(1.15) scaleY(.3) translateY(22%);}
     55%{transform:scaleX(.85) scaleY(1.15) translateY(-4%);}
@@ -1014,12 +1014,17 @@ function beginTransformation(onOutcomeReady){
   // Shrink his actual size (the real width number) down as he flattens, so it
   // reads as him genuinely getting smaller and smaller - not just stretching.
   const startWidth = mm.getBoundingClientRect().width;
+  // Stay right beside the animal: keep his right edge fixed while he shrinks (very slowly)
+  const startLeft = mm.getBoundingClientRect().left;
   mm.style.width = startWidth + 'px';
+  mm.style.left = startLeft + 'px';
   void mm.offsetWidth;
-  mm.style.transition = 'width 1s ease-in';
+  mm.style.transition = 'width 4s ease-in-out, left 4s ease-in-out';
   mm.classList.add('squishHold');
   requestAnimationFrame(()=>{
-    mm.style.width = Math.round(startWidth * 0.5) + 'px';
+    const newW = Math.round(startWidth * 0.5);
+    mm.style.width = newW + 'px';
+    mm.style.left = Math.round(startLeft + (startWidth - newW)) + 'px';
   });
 
   // Reveal the thumb only once the squish animation has visually settled
@@ -1034,7 +1039,7 @@ function beginTransformation(onOutcomeReady){
     document.getElementById('thumbPrompt').classList.add('show');
     showMMBubble("I've done this before... here goes!", 3000);
   }
-  setTimeout(()=>{ animDone = true; tryShowThumb(); }, 1000);
+  setTimeout(()=>{ animDone = true; tryShowThumb(); }, 4300);
   if(onOutcomeReady){
     onOutcomeReady(()=>{ textDone = true; tryShowThumb(); });
   } else {
@@ -1055,7 +1060,7 @@ function popFromSquish(){
 
   // Let the size and position ease down smoothly instead of snapping
   // instantly to the small size, so the shrink actually looks like shrinking.
-  const shrinkTransition = 'width 1.3s cubic-bezier(.45,0,.55,1), height 1.3s cubic-bezier(.45,0,.55,1), left 1.3s ease-in-out';
+  const shrinkTransition = 'width 4s cubic-bezier(.45,0,.55,1), height 4s cubic-bezier(.45,0,.55,1), left 4s ease-in-out, bottom 4s ease-in-out';
   mm.style.transition = shrinkTransition;
   shadow.style.transition = shrinkTransition;
 
@@ -1076,7 +1081,7 @@ function popFromSquish(){
     speakGated(line, false, null, ()=>{
       document.getElementById('nextBtn').disabled = false;
     });
-  }, 1500);
+  }, 4300);
 }
 
 function tapMarshmallow(){
